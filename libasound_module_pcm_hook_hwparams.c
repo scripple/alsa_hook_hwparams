@@ -24,7 +24,7 @@
  */
 #include <alsa/asoundlib.h>
 
-static int snd_pcm_hook_lbparams_hw_params(snd_pcm_hook_t *hook)
+static int snd_pcm_hook_hwparams_hw_params(snd_pcm_hook_t *hook)
 {
 	snd_pcm_t *pcm = NULL;
 	snd_pcm_info_t *info = NULL;
@@ -87,7 +87,7 @@ static int snd_pcm_hook_lbparams_hw_params(snd_pcm_hook_t *hook)
 		return err;
 }
 
-static int snd_pcm_hook_lbparams_hw_free(snd_pcm_hook_t *hook)
+static int snd_pcm_hook_hwparams_hw_free(snd_pcm_hook_t *hook)
 {
 	const char **commands = (const char **)snd_pcm_hook_get_private(hook);
 	// Send the close command so loopback can be opened / set with
@@ -99,7 +99,7 @@ static int snd_pcm_hook_lbparams_hw_free(snd_pcm_hook_t *hook)
 		return err;
 }
 
-static int snd_pcm_hook_lbparams_close(snd_pcm_hook_t *hook)
+static int snd_pcm_hook_hwparams_close(snd_pcm_hook_t *hook)
 {
 	const char **commands = (const char **)snd_pcm_hook_get_private(hook);
 	free((void *)commands[0]);
@@ -109,7 +109,7 @@ static int snd_pcm_hook_lbparams_close(snd_pcm_hook_t *hook)
 	return 0;
 }
 
-int _snd_pcm_hook_lbparams_install(snd_pcm_t *pcm, snd_config_t *conf)
+int _snd_pcm_hook_hwparams_install(snd_pcm_t *pcm, snd_config_t *conf)
 {
 	int err = 0;
 	const char *temp = NULL;
@@ -154,15 +154,15 @@ int _snd_pcm_hook_lbparams_install(snd_pcm_t *pcm, snd_config_t *conf)
 	strncpy(commands[1], temp, strlen(temp)+1);
   
 	err = snd_pcm_hook_add(&h_hw_params, pcm, SND_PCM_HOOK_TYPE_HW_PARAMS,
-			       snd_pcm_hook_lbparams_hw_params, (void *)commands);
+			       snd_pcm_hook_hwparams_hw_params, (void *)commands);
 	if (err < 0)
 		goto _err;
 	err = snd_pcm_hook_add(&h_hw_free, pcm, SND_PCM_HOOK_TYPE_HW_FREE,
-			       snd_pcm_hook_lbparams_hw_free, (void *)commands);
+			       snd_pcm_hook_hwparams_hw_free, (void *)commands);
 	if (err < 0)
 		goto _err;
 	err = snd_pcm_hook_add(&h_close, pcm, SND_PCM_HOOK_TYPE_CLOSE,
-			       snd_pcm_hook_lbparams_close, (void *)commands);
+			       snd_pcm_hook_hwparams_close, (void *)commands);
 	if (err < 0)
 		goto _err;
 
@@ -187,4 +187,4 @@ int _snd_pcm_hook_lbparams_install(snd_pcm_t *pcm, snd_config_t *conf)
 		snd_pcm_hook_remove(h_close);
 	return err;
 }
-SND_DLSYM_BUILD_VERSION(_snd_pcm_hook_lbparams_install, SND_PCM_DLSYM_VERSION);
+SND_DLSYM_BUILD_VERSION(_snd_pcm_hook_hwparams_install, SND_PCM_DLSYM_VERSION);
